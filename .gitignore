@@ -1,6 +1,9 @@
+# DB data which is only valid for the testing session involved.
 db_data
 
+# env file which is required to run a test session.
 .env
 
+# scripts which are pulled from remote repo for setting up kafka.
 add_avro_schemas.sh
 pull_event_schemas.sh
