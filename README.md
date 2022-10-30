@@ -4,3 +4,14 @@
 - Docker
 
 Contact Menu planning team for any help in setting this up.
+
+## Steps to run:
+`./setup.sh`
+
+> First setup time: ~5 mins
+
+> Subsequent setup time: ~2 mins
+
+## Usage: 
+
+API Docs: http://localhost:8080/docs/api

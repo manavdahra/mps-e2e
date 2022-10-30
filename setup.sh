@@ -6,6 +6,12 @@ then
 	exit 1
 fi
 
+if [[ ! -f ".env" ]]
+then
+	echo ".env file not found in root folder"
+	exit 1
+fi
+
 DOCKER_URL=489198589229.dkr.ecr.eu-west-1.amazonaws.com
 DOCKER_USR=AWS
 SSO_PROFILE=sso-hf-it-developer
@@ -18,7 +24,7 @@ SCRIPTS=(
 function cleanup_scripts {
 	for script in "${SCRIPTS[@]}"
 	do
-		rm $script
+		rm -f $script
 	done
 }
 
