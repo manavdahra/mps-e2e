@@ -1,0 +1,6 @@
+db_data
+
+.env
+
+add_avro_schemas.sh
+pull_event_schemas.sh
