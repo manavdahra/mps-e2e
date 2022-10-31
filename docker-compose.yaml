@@ -120,6 +120,6 @@ services:
         condition: service_healthy
     volumes:
       - "./wait_for_it.sh:/usr/local/bin/wait_for_it.sh"
-    command: [ "wait_for_it.sh", "api:8080", "-s", "--timeout=30", "--", "/mps", "-task", "create-menus" ]
+    command: [ "wait_for_it.sh", "api:8080", "-s", "--timeout=60", "--", "/mps", "-task", "create-menus" ]
     env_file:
       - .env
