@@ -15,3 +15,4 @@ Contact Menu planning team for any help in setting this up.
 ## Usage: 
 
 API Docs: http://localhost:8080/docs/api
+API base url: http://localhost:8080/
