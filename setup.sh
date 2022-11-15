@@ -12,6 +12,9 @@ then
 	exit 1
 fi
 
+# FIXME check if the network is already there
+docker network create caddy
+
 DOCKER_URL=489198589229.dkr.ecr.eu-west-1.amazonaws.com
 DOCKER_USR=AWS
 SSO_PROFILE=sso-hf-it-developer

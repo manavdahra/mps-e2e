@@ -1,6 +1,7 @@
 {
   email gibbok.coding@gmail.com
 }
-localhost:8080 {
+localhost {
   reverse_proxy /gw/scm/* api:8087
+  reverse_proxy host.docker.internal:8089
 }

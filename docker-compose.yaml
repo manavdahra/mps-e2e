@@ -1,5 +1,6 @@
 networks:
   caddy:
+    external: true
 services:
   db:
     image: postgres:13.2
@@ -143,6 +144,7 @@ services:
   caddy:
     image: caddy:latest
     ports:
-      - '8082:8082'
+      - '8080:8080'
+      - '2019:2019'
     networks:
       - caddy
