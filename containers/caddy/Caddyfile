@@ -1,0 +1,6 @@
+{
+  email gibbok.coding@gmail.com
+}
+localhost:8080 {
+  reverse_proxy /gw/scm/* api:8087
+}
