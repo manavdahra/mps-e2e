@@ -1,3 +1,5 @@
+networks:
+  caddy:
 services:
   db:
     image: postgres:13.2
@@ -15,6 +17,8 @@ services:
       POSTGRES_USER: mps
       POSTGRES_PASSWORD: fresh4you
       POSTGRES_DB: menu_planning_service
+    networks:
+      - caddy
 
   zookeeper:
     image: ghcr.io/arm64-compat/confluentinc/cp-zookeeper:6.2.4
@@ -23,6 +27,8 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - caddy
 
   kafka:
     image: ghcr.io/arm64-compat/confluentinc/cp-kafka:6.2.4
@@ -61,6 +67,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - caddy
 
   schema-registry:
     image: ghcr.io/arm64-compat/confluentinc/cp-schema-registry:6.2.4
@@ -78,6 +86,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - caddy
 
   outbox:
     image: ${DOCKER_URL}/outbox-worker-kafka:1.10.7
@@ -98,11 +108,13 @@ services:
       AVRO_ENABLE_RAW: "true"
       AVRO_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
       LOG_LEVEL: 'development'
+    networks:
+      - caddy
 
   api:
     image: ${DOCKER_URL}/menu-planning-service-api:${TAG:-latest}
     ports:
-      - '8080:8080'
+      - '8087:8080'
     depends_on:
       db:
         condition: service_healthy
@@ -110,6 +122,8 @@ services:
         condition: service_healthy
     env_file:
       - .env
+    networks:
+      - caddy
 
   api-init:
     image: ${DOCKER_URL}/menu-planning-service-cron:${TAG:-latest}
@@ -123,3 +137,12 @@ services:
     command: [ "wait_for_it.sh", "api:8080", "-s", "--timeout=60", "--", "/mps", "-task", "create-menus" ]
     env_file:
       - .env
+    networks:
+      - caddy
+
+  caddy:
+    image: caddy:latest
+    ports:
+      - '8080:8082'
+    networks:
+      - caddy
