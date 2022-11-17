@@ -2,6 +2,18 @@
   email gibbok.coding@gmail.com
 }
 localhost, http://localhost {
-  reverse_proxy /gw/scm/menu-planning/* api:8080
-  reverse_proxy {env.LOCAL_DOCKER_HOST}:8666
+  handle_path /gw/scm/menu-planning/* {
+    reverse_proxy  api:8080
+  }
+
+  handle_path /gw/users/* {
+    reverse_proxy https://staging-operations.hellofresh.com:443/gw/users/
+  }
+
+  handle_path /gw/configurations/* {
+    reverse_proxy https://staging-operations.hellofresh.com:443/gw/configurations/
+  }
+
+  reverse_proxy host.docker.internal:8666
+#  reverse_proxy {env.LOCAL_DOCKER_HOST}:8666
 }
