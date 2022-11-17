@@ -1,11 +1,8 @@
-networks:
-  caddy:
-    external: true
 services:
   db:
     image: postgres:13.2
     ports:
-      - '5432:5432'
+      - "5442:5432"
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U mps -d menu_planning_service" ]
       interval: 30s
@@ -18,18 +15,14 @@ services:
       POSTGRES_USER: mps
       POSTGRES_PASSWORD: fresh4you
       POSTGRES_DB: menu_planning_service
-    networks:
-      - caddy
 
   zookeeper:
     image: ghcr.io/arm64-compat/confluentinc/cp-zookeeper:6.2.4
     ports:
-      - "2181:2181"
+      - "2191:2181"
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
-    networks:
-      - caddy
 
   kafka:
     image: ghcr.io/arm64-compat/confluentinc/cp-kafka:6.2.4
@@ -37,8 +30,8 @@ services:
     depends_on:
       - zookeeper
     ports:
-      - "9092:9092"
-      - "9101:9101"
+      - "9002:9092"
+      - "9111:9101"
     volumes:
       - "./add_avro_schemas.sh:/usr/local/bin/add_avro_schemas.sh"
       - "./pull_event_schemas.sh:/usr/local/bin/pull_event_schemas.sh"
@@ -68,8 +61,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - caddy
 
   schema-registry:
     image: ghcr.io/arm64-compat/confluentinc/cp-schema-registry:6.2.4
@@ -78,7 +69,7 @@ services:
       kafka:
         condition: service_healthy
     ports:
-      - "8081:8081"
+      - "8091:8081"
     environment:
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'PLAINTEXT://kafka:29092'
       SCHEMA_REGISTRY_HOST_NAME: schema-registry
@@ -87,13 +78,11 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - caddy
 
   outbox:
     image: ${DOCKER_URL}/outbox-worker-kafka:1.10.7
     ports:
-      - '8889:8889'
+      - "8899:8889"
     depends_on:
       db:
         condition: service_healthy
@@ -109,13 +98,11 @@ services:
       AVRO_ENABLE_RAW: "true"
       AVRO_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
       LOG_LEVEL: 'development'
-    networks:
-      - caddy
 
   api:
     image: ${DOCKER_URL}/menu-planning-service-api:${TAG:-latest}
     ports:
-      - '8087'
+      - "8087:8080"
     depends_on:
       db:
         condition: service_healthy
@@ -123,28 +110,30 @@ services:
         condition: service_healthy
     env_file:
       - .env
-    networks:
-      - caddy
 
   api-init:
     image: ${DOCKER_URL}/menu-planning-service-cron:${TAG:-latest}
     depends_on:
-      db:
-        condition: service_healthy
-      schema-registry:
-        condition: service_healthy
+      api:
+        condition: service_started
     volumes:
       - "./wait_for_it.sh:/usr/local/bin/wait_for_it.sh"
     command: [ "wait_for_it.sh", "api:8080", "-s", "--timeout=60", "--", "/mps", "-task", "create-menus" ]
     env_file:
       - .env
-    networks:
-      - caddy
 
   caddy:
     image: caddy:latest
+    depends_on:
+      api-init:
+        condition: service_completed_successfully
+    volumes:
+      - "./containers/caddy/Caddyfile:/etc/caddy/Caddyfile"
+    expose:
+      - "2019"
     ports:
-      - '8080:8080'
-      - '2019:2019'
-    networks:
-      - caddy
+      - "8000:80"
+      - "4443:443"
+      - "4443:443/udp"
+    environment:
+      LOCAL_DOCKER_HOST: ${LOCAL_DOCKER_HOST}
