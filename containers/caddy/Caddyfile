@@ -1,7 +1,19 @@
 {
   email gibbok.coding@gmail.com
+
+  servers localhost {
+    max_header_size 10mb
+  }
+
+  servers http://localhost {
+    max_header_size 10mb
+  }
 }
+
 localhost, http://localhost {
   reverse_proxy /gw/scm/menu-planning/* api:8080
+
+  rewrite /gw/* https://staging-operations.hellofresh.com/gw
+
   reverse_proxy {env.LOCAL_DOCKER_HOST}:8666
 }
