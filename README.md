@@ -14,5 +14,5 @@ Contact Menu planning team for any help in setting this up.
 
 ## Usage:
 
-API Docs: http://localhost:8087/docs/api
-API base url: http://localhost:8087/
+API Docs: http://localhost:8080/gw/scm/menu-planning/docs/api
+API base url: http://localhost:8080/gw/scm/menu-planning

@@ -12,12 +12,6 @@ then
 	exit 1
 fi
 
-OS="$(uname -s)"
-case $(uname -s) in
-  Linux*)  export LOCAL_DOCKER_HOST="172.17.0.1";;
-  Darwin*) export LOCAL_DOCKER_HOST="host.docker.internal";;
-esac
-
 DOCKER_URL=489198589229.dkr.ecr.eu-west-1.amazonaws.com
 DOCKER_USR=AWS
 SSO_PROFILE=sso-hf-it-developer

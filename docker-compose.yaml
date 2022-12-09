@@ -111,6 +111,29 @@ services:
     env_file:
       - .env
 
+  front:
+    image: ${DOCKER_URL}/scm-culinary-menu-next-fragment:${FRONT_TAG:-latest}
+    ports:
+      # Defined in the .env file
+      - "8668:8081"
+      - "8669:8080"
+    depends_on:
+      api:
+        condition: service_started
+    env_file:
+      - .env.front
+
+  auth:
+    image: ${DOCKER_URL}/scm-auth-fragment:${AUTH_TAG:-latest}
+    ports:
+      # Defined in the .env file
+      - "8667:3000"
+    depends_on:
+      front:
+        condition: service_started
+    env_file:
+      - .env.auth
+
   api-init:
     image: ${DOCKER_URL}/menu-planning-service-cron:${TAG:-latest}
     depends_on:
@@ -122,18 +145,19 @@ services:
     env_file:
       - .env
 
-  caddy:
-    image: caddy:latest
+  nginx:
+    image: nginx:latest
     depends_on:
       api-init:
         condition: service_completed_successfully
-    volumes:
-      - "./containers/caddy/Caddyfile:/etc/caddy/Caddyfile"
-    expose:
-      - "2019"
     ports:
-      - "8000:80"
-      - "4443:443"
-      - "4443:443/udp"
-    environment:
-      LOCAL_DOCKER_HOST: ${LOCAL_DOCKER_HOST}
+      - "8080:80"
+    volumes:
+      - "./containers/nginx/nginx.conf:/etc/nginx/nginx.conf"
+
+networks:
+  default:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.16.59.0/24
