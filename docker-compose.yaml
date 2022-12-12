@@ -148,8 +148,8 @@ services:
   nginx:
     image: nginx:latest
     depends_on:
-      api-init:
-        condition: service_completed_successfully
+      api:
+        condition: service_started
     ports:
       - "8080:80"
     volumes:
