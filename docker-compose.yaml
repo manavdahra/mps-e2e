@@ -32,9 +32,6 @@ services:
     ports:
       - "9002:9092"
       - "9111:9101"
-    volumes:
-      - "./add_avro_schemas.sh:/usr/local/bin/add_avro_schemas.sh"
-      - "./pull_event_schemas.sh:/usr/local/bin/pull_event_schemas.sh"
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
@@ -55,7 +52,6 @@ services:
       CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
       CONFLUENT_METRICS_ENABLE: "true"
       CONFLUENT_SUPPORT_CUSTOMER_ID: "anonymous"
-      GITHUB_TOKEN: ${GITHUB_TOKEN}
     healthcheck:
       test: [ "CMD", "kafka-topics", "--list", "--bootstrap-server", "kafka:29092" ]
       interval: 10s
@@ -78,6 +74,21 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  kafka-init:
+    image: ghcr.io/arm64-compat/confluentinc/cp-kafka:6.2.4
+    depends_on:
+      kafka:
+        condition: service_healthy
+      schema-registry:
+        condition: service_healthy
+    volumes:
+      - "./add_avro_schemas.sh:/usr/local/bin/add_avro_schemas.sh"
+      - "./pull_event_schemas.sh:/usr/local/bin/pull_event_schemas.sh"
+      - "./setup_kafka.sh:/usr/local/bin/setup_kafka.sh"
+    environment:
+      GITHUB_TOKEN: ${GITHUB_TOKEN}
+    command: ["setup_kafka.sh"]
 
   outbox:
     image: ${DOCKER_URL}/outbox-worker-kafka:1.10.7
@@ -108,6 +119,8 @@ services:
         condition: service_healthy
       schema-registry:
         condition: service_healthy
+      kafka-init:
+        condition: service_completed_successfully
     env_file:
       - .env
 
@@ -148,7 +161,7 @@ services:
   nginx:
     image: nginx:latest
     depends_on:
-      api:
+      auth:
         condition: service_started
     ports:
       - "8080:80"
