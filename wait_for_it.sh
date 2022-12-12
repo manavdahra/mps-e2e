@@ -1,12 +1,6 @@
 #!/usr/bin/env bash
 # Use this script to test if a given TCP host/port are available
 
-OS="$(uname -s)"
-if [[ "${OS}" == "Linux" ]]; then
-  echo "Linux not supported"
-  exit 0
-fi
-
 WAITFORIT_cmdname=${0##*/}
 
 echoerr() { if [[ $WAITFORIT_QUIET -ne 1 ]]; then echo "$@" 1>&2; fi }
