@@ -1,7 +1,0 @@
-{
-  email gibbok.coding@gmail.com
-}
-
-localhost, http://localhost {
-  reverse_proxy /gw/scm/menu-planning/* api:8080
-}
